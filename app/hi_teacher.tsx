@@ -21,8 +21,6 @@ export default function HiTeacher() {
       triggerShake();
     } else {
       setError("");
-      console.log("Teacher's Name:", teacherName);
-      //router.push("/");
     }
   };
 

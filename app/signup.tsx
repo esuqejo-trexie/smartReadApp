@@ -1,6 +1,6 @@
 import { Text, View, Image, TouchableOpacity, Modal } from "react-native";
 import { useState } from "react";
-import { router } from "expo-router"; // Import router for navigation
+import { router } from "expo-router";
 
 export default function SignUp() {
   const [selectedUserType, setSelectedUserType] = useState<string | null>(null);
@@ -10,11 +10,9 @@ export default function SignUp() {
     if (!selectedUserType) {
       setModalVisible(true);
     } else {
-      console.log("Sign Up as:", selectedUserType);
       if (selectedUserType === "teacher") {
         router.push("/welcome_teacher");
       } else {
-        console.log("Sign up as Parent");
         // For example, you could navigate to another page like '/welcome_parent'
         // router.push("/welcome_parent");
       }
@@ -70,7 +68,11 @@ export default function SignUp() {
         <Text className="text-white text-3xl font-sans-medium">SIGN UP</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => console.log("Navigate to login")}>
+      <TouchableOpacity
+        onPress={() => {
+          /* Handle login navigation here */
+        }}
+      >
         <Text className="text-xs text-pink-600 underline">
           HAVE AN ACCOUNT? LOG IN
         </Text>

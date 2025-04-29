@@ -12,7 +12,9 @@ import { router } from "expo-router";
 
 export default function WelcomeTeacher() {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const shakeAnimation = useRef(new Animated.Value(0)).current;
 
@@ -52,15 +54,24 @@ export default function WelcomeTeacher() {
   };
 
   const handleContinue = () => {
+    // Clear previous error messages
+    setEmailError("");
+    setPasswordError("");
+
     if (email.trim() === "") {
-      setError("Email address is required.");
+      setEmailError("Email address is required.");
       triggerShake();
     } else if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
+      setEmailError("Please enter a valid email address.");
+      triggerShake();
+    } else if (password.trim() === "") {
+      setPasswordError("Password is required.");
+      triggerShake();
+    } else if (password.length < 8 || password.length > 16) {
+      setPasswordError("Password must be between 8 and 16 characters.");
       triggerShake();
     } else {
-      setError("");
-      console.log("Email entered:", email);
+      // Clear any previous error
       router.push("/hi_teacher");
     }
   };
@@ -75,34 +86,58 @@ export default function WelcomeTeacher() {
         <Text className="text-4xl font-sans-semibold text-txt_blue mb-4">
           WELCOME!
         </Text>
-
         <Text className="text-center text-md font-sans-regular text-gray-700 mb-4">
           Create an account to monitor your learner’s skill progress.
         </Text>
 
-        {error !== "" && (
+        {/* Email Error Message */}
+        {emailError !== "" && (
           <Text className="text-red-500 w-full text-left mb-2 text-sm">
-            {error}
+            {emailError}
           </Text>
         )}
 
         <Animated.View
-          style={{
-            width: "100%",
-            transform: [{ translateX: shakeAnimation }],
-          }}
+          style={{ width: "100%", transform: [{ translateX: shakeAnimation }] }}
         >
+          {/* Email Input */}
           <TextInput
             placeholder="Email address"
             value={email}
             onChangeText={(text) => {
               setEmail(text);
-              if (error) setError("");
+              if (emailError) setEmailError(""); // Reset email error when updated
             }}
             keyboardType="email-address"
             autoCapitalize="none"
+            className={`h-12 border rounded-lg px-4 mt-2 mb-4 ${
+              emailError ? "border-red-500" : "border-gray-500"
+            }`}
+          />
+        </Animated.View>
+
+        {/* Password Error Message */}
+        {passwordError !== "" && (
+          <Text className="text-red-500 w-full text-left mb-2 text-sm">
+            {passwordError}
+          </Text>
+        )}
+
+        <Animated.View
+          style={{ width: "100%", transform: [{ translateX: shakeAnimation }] }}
+        >
+          {/* Password Input */}
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (passwordError) setPasswordError(""); // Reset password error when updated
+            }}
+            secureTextEntry={true} // Hide password text
+            autoCapitalize="none"
             className={`h-12 border rounded-lg px-4 mt-2 mb-10 ${
-              error ? "border-red-500" : "border-gray-500"
+              passwordError ? "border-red-500" : "border-gray-500"
             }`}
           />
         </Animated.View>
@@ -118,7 +153,9 @@ export default function WelcomeTeacher() {
 
         <TouchableOpacity
           className="border-2 border-gray-300 w-full py-3 rounded-full flex-row justify-center items-center mt-20 mb-4"
-          onPress={() => console.log("Google Sign Up clicked")}
+          onPress={() => {
+            /* Handle Google Sign Up here */
+          }}
         >
           <Image
             source={require("../assets/images/google-icon.png")}
@@ -133,8 +170,8 @@ export default function WelcomeTeacher() {
         {/* Terms and Privacy Policy */}
         <Text className="text-xs text-gray-500 text-center mt-4">
           By signing in to SmartRead, you agree to our{" "}
-          <Text className="text-pink-600">Terms</Text> and{" "}
-          <Text className="text-pink-600">Privacy Policy</Text>.
+          <Text className="text-primary">Terms</Text> and{" "}
+          <Text className="text-primary">Privacy Policy</Text>.
         </Text>
       </View>
     </ImageBackground>
