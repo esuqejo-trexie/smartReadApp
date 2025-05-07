@@ -6,11 +6,13 @@ import {
   TouchableOpacity,
   Image,
   Animated,
+  useWindowDimensions,
 } from "react-native";
 import { useState, useRef } from "react";
 import { router } from "expo-router";
 
 export default function WelcomeTeacher() {
+  const { width, height } = useWindowDimensions();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -54,7 +56,6 @@ export default function WelcomeTeacher() {
   };
 
   const handleContinue = () => {
-    // Clear previous error messages
     setEmailError("");
     setPasswordError("");
 
@@ -71,7 +72,6 @@ export default function WelcomeTeacher() {
       setPasswordError("Password must be between 8 and 16 characters.");
       triggerShake();
     } else {
-      // Clear any previous error
       router.push("/hi_teacher");
     }
   };
@@ -79,14 +79,15 @@ export default function WelcomeTeacher() {
   return (
     <ImageBackground
       source={require("../assets/images/bg.jpg")}
+      style={{ width, height }}
       className="flex-1"
     >
       <View className="absolute inset-0 bg-white opacity-90" />
       <View className="flex-1 justify-center items-center px-6">
-        <Text className="text-4xl font-sans-semibold text-txt_blue mb-4">
+        <Text className="text-4xl sm:text-5xl lg:text-6xl font-sans-semibold text-txt_blue mb-4">
           WELCOME!
         </Text>
-        <Text className="text-center text-md font-sans-regular text-gray-700 mb-4">
+        <Text className="text-center text-md sm:text-lg lg:text-xl font-sans-regular text-gray-700 mb-4">
           Create an account to monitor your learner’s skill progress.
         </Text>
 
@@ -106,7 +107,7 @@ export default function WelcomeTeacher() {
             value={email}
             onChangeText={(text) => {
               setEmail(text);
-              if (emailError) setEmailError(""); // Reset email error when updated
+              if (emailError) setEmailError("");
             }}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -132,9 +133,9 @@ export default function WelcomeTeacher() {
             value={password}
             onChangeText={(text) => {
               setPassword(text);
-              if (passwordError) setPasswordError(""); // Reset password error when updated
+              if (passwordError) setPasswordError("");
             }}
-            secureTextEntry={true} // Hide password text
+            secureTextEntry={true}
             autoCapitalize="none"
             className={`h-12 border rounded-lg px-4 mt-2 mb-10 ${
               passwordError ? "border-red-500" : "border-gray-500"
@@ -146,7 +147,7 @@ export default function WelcomeTeacher() {
           onPress={handleContinue}
           className="bg-primary w-full py-3 rounded-full mb-4"
         >
-          <Text className="text-white text-xl font-sans-medium text-center">
+          <Text className="text-white text-xl sm:text-2xl lg:text-3xl font-sans-medium text-center">
             CONTINUE
           </Text>
         </TouchableOpacity>
@@ -159,16 +160,17 @@ export default function WelcomeTeacher() {
         >
           <Image
             source={require("../assets/images/google-icon.png")}
-            className="w-6 h-6 mr-2"
+            style={{ width: width * 0.1, height: width * 0.1 }}
             resizeMode="contain"
+            className="mx-2 mr-4"
           />
-          <Text className="text-xl text-gray-700 font-sans-medium">
+          <Text className="text-xl sm:text-2xl lg:text-3xl text-gray-700 font-sans-medium">
             SIGN UP WITH GOOGLE
           </Text>
         </TouchableOpacity>
 
         {/* Terms and Privacy Policy */}
-        <Text className="text-xs text-gray-500 text-center mt-4">
+        <Text className="text-xs sm:text-sm lg:text-base text-gray-500 text-center mt-4">
           By signing in to SmartRead, you agree to our{" "}
           <Text className="text-primary">Terms</Text> and{" "}
           <Text className="text-primary">Privacy Policy</Text>.
