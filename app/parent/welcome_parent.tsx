@@ -1,3 +1,4 @@
+// app/parent/welcome_parent.tsx
 import {
   ImageBackground,
   Text,
@@ -11,7 +12,7 @@ import {
 import { useState, useRef } from "react";
 import { router } from "expo-router";
 
-export default function WelcomeTeacher() {
+export default function WelcomeParent() {
   const { width, height } = useWindowDimensions();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -72,13 +73,13 @@ export default function WelcomeTeacher() {
       setPasswordError("Password must be between 8 and 16 characters.");
       triggerShake();
     } else {
-      router.push("/hi_teacher");
+      router.push("/parent/hi_parent");
     }
   };
 
   return (
     <ImageBackground
-      source={require("../assets/images/bg.jpg")}
+      source={require("../../assets/images/bg.jpg")}
       style={{ width, height }}
       className="flex-1"
     >
@@ -88,10 +89,9 @@ export default function WelcomeTeacher() {
           WELCOME!
         </Text>
         <Text className="text-center text-md sm:text-lg lg:text-xl font-sans-regular text-gray-700 mb-4">
-          Create an account to monitor your learner’s skill progress.
+          Create an account to support your child’s reading journey.
         </Text>
 
-        {/* Email Error Message */}
         {emailError !== "" && (
           <Text className="text-red-500 w-full text-left mb-2 text-sm">
             {emailError}
@@ -101,7 +101,6 @@ export default function WelcomeTeacher() {
         <Animated.View
           style={{ width: "100%", transform: [{ translateX: shakeAnimation }] }}
         >
-          {/* Email Input */}
           <TextInput
             placeholder="Email address"
             value={email}
@@ -117,7 +116,6 @@ export default function WelcomeTeacher() {
           />
         </Animated.View>
 
-        {/* Password Error Message */}
         {passwordError !== "" && (
           <Text className="text-red-500 w-full text-left mb-2 text-sm">
             {passwordError}
@@ -127,7 +125,6 @@ export default function WelcomeTeacher() {
         <Animated.View
           style={{ width: "100%", transform: [{ translateX: shakeAnimation }] }}
         >
-          {/* Password Input */}
           <TextInput
             placeholder="Password"
             value={password}
@@ -159,7 +156,7 @@ export default function WelcomeTeacher() {
           }}
         >
           <Image
-            source={require("../assets/images/google-icon.png")}
+            source={require("../../assets/images/google-icon.png")}
             style={{ width: width * 0.1, height: width * 0.1 }}
             resizeMode="contain"
             className="mx-2 mr-4"
@@ -169,7 +166,6 @@ export default function WelcomeTeacher() {
           </Text>
         </TouchableOpacity>
 
-        {/* Terms and Privacy Policy */}
         <Text className="text-xs sm:text-sm lg:text-base text-gray-500 text-center mt-4">
           By signing in to SmartRead, you agree to our{" "}
           <Text className="text-primary">Terms</Text> and{" "}
