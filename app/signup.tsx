@@ -22,8 +22,7 @@ export default function SignUp() {
       if (selectedUserType === "teacher") {
         router.push("/welcome_teacher");
       } else {
-        // For example, you could navigate to another page like '/welcome_parent'
-        // router.push("/welcome_parent");
+        router.push("/parent/welcome_parent");
       }
     }
   };
