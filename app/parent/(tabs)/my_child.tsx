@@ -58,10 +58,12 @@ export default function MyChildScreen() {
               }}
             />
             <View>
-              <Text className="text-lg font-semibold text-gray-800">
+              <Text className="text-lg font-sans-semibold text-gray-800">
                 Alyssa
               </Text>
-              <Text className="text-sm text-gray-500">Grade 3</Text>
+              <Text className="text-sm font-sans-regular text-gray-500">
+                Grade 3
+              </Text>
             </View>
           </View>
 
@@ -72,7 +74,7 @@ export default function MyChildScreen() {
             }}
             className="bg-secondary px-4 py-2 rounded-full"
           >
-            <Text className="text-white text-sm font-semibold">
+            <Text className="text-white text-sm font-sans-semibold">
               Play as Alyssa
             </Text>
           </TouchableOpacity>
@@ -88,17 +90,17 @@ export default function MyChildScreen() {
           }}
           className="bg-primary"
         >
-          <Text className="text-white text-lg font-semibold mb-2">
+          <Text className="font-sans-semibold text-white text-lg font-semibold mb-2">
             Reading Progress
           </Text>
           <View className="bg-white rounded-xl p-3">
-            <Text className="text-base text-gray-800">
+            <Text className="font-sans-medium text-base text-gray-800">
               ⭐ Current Level: Beginner
             </Text>
-            <Text className="text-base text-gray-800 mt-1">
+            <Text className="font-sans-medium text-base text-gray-800 mt-1">
               📚 Last Story: The Crow and The Pitcher
             </Text>
-            <Text className="text-base text-gray-800 mt-1">
+            <Text className=" font-sans-medium text-base text-gray-800 mt-1">
               🎯 Accuracy: 92%
             </Text>
           </View>
@@ -114,7 +116,7 @@ export default function MyChildScreen() {
           }}
           className="bg-white shadow-md"
         >
-          <Text className="text-txt_blue text-lg font-semibold mb-4">
+          <Text className="font-sans-semibold text-txt_blue text-lg font-semibold mb-4">
             🏅 Badges Collected
           </Text>
           <View className="flex-row justify-between items-center">
@@ -155,7 +157,7 @@ export default function MyChildScreen() {
           }}
           className="bg-white shadow-md"
         >
-          <Text className="text-txt_blue text-lg font-semibold mb-4">
+          <Text className="font-sans-semibold text-txt_blue text-lg font-semibold mb-4">
             📅 Activity Past 7 Days
           </Text>
           <View className="flex-row justify-around">
@@ -197,10 +199,10 @@ export default function MyChildScreen() {
           }}
           className="bg-white shadow-md"
         >
-          <Text className="text-txt_blue text-lg font-semibold mb-4">
+          <Text className="font-sans-semibold text-txt_blue text-lg font-semibold mb-4">
             📝 Quiz Results
           </Text>
-          <Text className="text-base font-medium text-gray-800 mb-2">
+          <Text className="font-sans-medium text-base text-gray-800 mb-2">
             Quiz: Belling the Cat
           </Text>
 
@@ -212,8 +214,10 @@ export default function MyChildScreen() {
             />
           </View>
 
-          <Text className="text-sm text-gray-600 mt-1 text-right">86%</Text>
-          <Text className="text-base font-medium text-gray-800 mb-2">
+          <Text className="text-sm text-gray-600 mt-1 text-right font-sans-regular">
+            86%
+          </Text>
+          <Text className="text-base font-sans-medium text-gray-800 mb-2">
             Quiz: The Crow and The Pitcher
           </Text>
 
@@ -225,7 +229,9 @@ export default function MyChildScreen() {
             />
           </View>
 
-          <Text className="text-sm text-gray-600 mt-1 text-right">97%</Text>
+          <Text className="text-sm text-gray-600 mt-1 text-right font-sans-regular">
+            97%
+          </Text>
         </View>
 
         {/* Footer Spacer */}
