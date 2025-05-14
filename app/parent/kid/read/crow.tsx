@@ -3,10 +3,9 @@ import {
   View,
   Text,
   Pressable,
-  Image,
-  useWindowDimensions,
   Animated,
   ScrollView,
+  useWindowDimensions,
   Modal,
 } from "react-native";
 import * as Speech from "expo-speech";
@@ -33,15 +32,18 @@ const storyImages: any[] = [
 export default function CrowStory() {
   const [page, setPage] = useState<number>(0);
   const [isListening, setIsListening] = useState<boolean>(false);
+  const [isReading, setIsReading] = useState<boolean>(false);
   const [accuracy, setAccuracy] = useState<number>(0);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [showPrompt, setShowPrompt] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [readingTime, setReadingTime] = useState(60); // Placeholder value
 
   const { width } = useWindowDimensions();
   const isSmallDevice = width < 375;
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const imageWidth = Math.min(width * 0.9, 400);
   const imageHeight = (imageWidth * 3) / 2 - 25;
@@ -57,6 +59,8 @@ export default function CrowStory() {
 
   const changePage = (nextPage: number) => {
     Speech.stop();
+    setShowPrompt(false);
+    setIsReading(true);
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 300,
@@ -64,35 +68,40 @@ export default function CrowStory() {
     }).start(() => {
       setPage(nextPage);
       updateProgress(nextPage);
+      setAccuracy(0);
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
         useNativeDriver: true,
-      }).start();
+      }).start(() => {
+        handleSpeak();
+      });
     });
   };
 
   const handleSpeak = () => {
+    setShowPrompt(false);
+    setIsReading(true);
     Speech.speak(storyPages[page], {
       rate: 0.6,
       pitch: 1.0,
       language: "en-US",
       onDone: () => {
-        setShowMic(true);
+        setIsReading(false);
+        setShowPrompt(true);
       },
     });
-    setShowMic(false);
   };
 
   const handleStop = () => {
     Speech.stop();
-    setShowMic(true);
+    setIsReading(false);
+    setShowPrompt(false);
   };
-
-  const [showMic, setShowMic] = useState(false);
 
   const handleStartListening = () => {
     setIsListening(true);
+    // Placeholder for speech recognition
   };
 
   const handleStopListening = () => {
@@ -110,11 +119,31 @@ export default function CrowStory() {
   };
 
   useEffect(() => {
-    updateProgress(page);
-    if (page === 0) setStartTime(Date.now());
-  }, [page]);
+    if (isListening) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.4,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(1);
+    }
+  }, [isListening]);
 
-  const readingTime = Math.floor((Date.now() - startTime) / 1000);
+  useEffect(() => {
+    updateProgress(page);
+    handleSpeak(); // Speak first page on load
+  }, []);
 
   return (
     <ScrollView
@@ -160,6 +189,12 @@ export default function CrowStory() {
           {storyPages[page]}
         </Animated.Text>
 
+        {showPrompt && (
+          <Text className="text-lg font-semibold text-blue-700 mb-2">
+            Your turn! Use the mic to read the story.
+          </Text>
+        )}
+
         <View className="mb-4">
           <Text className="text-lg">Reading Accuracy: {accuracy}%</Text>
           <View className="w-full bg-gray-200 h-2 mt-2">
@@ -188,35 +223,36 @@ export default function CrowStory() {
             <MaterialIcons name="stop" size={24} color="white" />
           </Pressable>
 
-          {showMic && (
-            <Pressable
-              onPress={isListening ? handleStopListening : handleStartListening}
-              className={`p-3 rounded-full items-center justify-center ${
-                isListening ? "bg-red-600" : "bg-blue-500"
-              }`}
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.3,
-                shadowRadius: 2,
-                transform: isListening
-                  ? [
-                      {
-                        scale: fadeAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 1.1],
-                        }),
-                      },
-                    ]
-                  : [],
-              }}
-            >
-              <MaterialIcons
-                name={isListening ? "mic" : "mic-off"}
-                size={24}
-                color="white"
-              />
-            </Pressable>
+          {!isReading && (
+            <View className="relative items-center justify-center">
+              {isListening && (
+                <Animated.View
+                  style={{
+                    position: "absolute",
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
+                    backgroundColor: "#3B82F6",
+                    transform: [{ scale: pulseAnim }],
+                    opacity: 0.5,
+                    zIndex: -1,
+                  }}
+                />
+              )}
+              <Pressable
+                onPress={
+                  isListening ? handleStopListening : handleStartListening
+                }
+                className="bg-blue-500 p-3 rounded-full items-center justify-center"
+                style={{ width: 60, height: 60 }}
+              >
+                <MaterialIcons
+                  name={isListening ? "mic" : "mic-off"}
+                  size={28}
+                  color="white"
+                />
+              </Pressable>
+            </View>
           )}
         </View>
 
@@ -229,18 +265,18 @@ export default function CrowStory() {
               <Text className="text-white font-semibold">Previous</Text>
             </Pressable>
           )}
-
-          {page < storyPages.length - 1 ? (
+          {page < storyPages.length - 1 && (
             <Pressable
               onPress={() => changePage(page + 1)}
               className="bg-green-500 px-4 py-2 rounded-xl ml-auto"
             >
               <Text className="text-white font-semibold">Next</Text>
             </Pressable>
-          ) : (
+          )}
+          {page === storyPages.length - 1 && (
             <Pressable
               onPress={() => setIsModalVisible(true)}
-              className="bg-green-600 px-4 py-2 rounded-xl ml-auto"
+              className="bg-green-500 px-4 py-2 rounded-xl ml-auto"
             >
               <Text className="text-white font-semibold">Finish</Text>
             </Pressable>
@@ -248,6 +284,7 @@ export default function CrowStory() {
         </View>
       </View>
 
+      {/* 🎉 Modal */}
       <Modal transparent visible={isModalVisible} animationType="fade">
         <View className="flex-1 justify-center items-center px-6 absolute inset-0">
           <View className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
