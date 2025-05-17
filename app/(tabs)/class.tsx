@@ -9,21 +9,23 @@ import {
   Platform,
   KeyboardAvoidingView,
   Modal,
-  Alert, // Keep Alert for now, or replace with your preferred notification
+  Alert,
+  Image,
+  ScrollView,
 } from "react-native";
-import React, { useState, useCallback } from "react"; // Added useCallback
+import React, { useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Define the structure for a student object
 interface Student {
-  id: string; // Unique code for the student
+  id: string;
   studentName: string;
   parentName: string;
   contactNumber: string;
-  invitationSent: boolean; // To track if an invitation has been sent
+  invitationSent: boolean;
+  registered: boolean;
+  active: boolean;
 }
 
-// Function to generate a unique 6-character alphanumeric code
 const generateCode = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";
@@ -37,14 +39,23 @@ const generateCode = (): string => {
 export default function ClassScreen(): JSX.Element {
   const { width, height } = useWindowDimensions();
   const [inputText, setInputText] = useState<string>("");
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<Student[]>([
+    {
+      id: "ABC123",
+      studentName: "Alyssa Perez",
+      parentName: "Mary Perez",
+      contactNumber: "09058965583",
+      invitationSent: true,
+      registered: true,
+      active: true,
+    },
+  ]);
   const [showInvalidInputModal, setShowInvalidInputModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
-  // Handles adding new students from the input text
   const handleAddStudents = useCallback((): void => {
     const trimmedInput = inputText.trim();
-
-    // Show modal if input is empty
     if (trimmedInput === "") {
       setShowInvalidInputModal(true);
       return;
@@ -55,14 +66,12 @@ export default function ClassScreen(): JSX.Element {
     const newStudents: Student[] = lines
       .map((line): Student | null => {
         const [studentName, parentName, contactNumber] = line.split(",");
-
-        // Validate if all parts are present and not just whitespace
         if (
           !studentName?.trim() ||
           !parentName?.trim() ||
           !contactNumber?.trim()
         ) {
-          return null; // Invalid line
+          return null;
         }
         validInputFound = true;
         return {
@@ -71,24 +80,21 @@ export default function ClassScreen(): JSX.Element {
           parentName: parentName.trim(),
           contactNumber: contactNumber.trim(),
           invitationSent: false,
+          registered: false,
+          active: false,
         };
       })
       .filter((student): student is Student => student !== null);
 
-    // Show modal if input was provided but no valid students were parsed
     if (!validInputFound) {
       setShowInvalidInputModal(true);
-      return; // Return here to prevent clearing input if no valid students were added
+      return;
     }
 
-    // Add valid students to the list and clear input
-    if (newStudents.length > 0) {
-      setStudents((prevStudents) => [...prevStudents, ...newStudents]);
-      setInputText(""); // Clear input only if students were successfully added
-    }
+    setStudents((prevStudents) => [...prevStudents, ...newStudents]);
+    setInputText("");
   }, [inputText]);
 
-  // Handles sending an invitation to a student
   const handleSendInvitation = useCallback((studentId: string): void => {
     setStudents((prevStudents) =>
       prevStudents.map((student) => {
@@ -104,55 +110,91 @@ export default function ClassScreen(): JSX.Element {
     );
   }, []);
 
-  // Renders each student item in the list
+  const openMessageModal = (student: Student) => {
+    setSelectedStudent(student);
+    setShowMessageModal(true);
+  };
+
+  const renderStatusButton = (student: Student) => {
+    if (student.active) {
+      return (
+        <View
+          className="bg-green-600 px-3 py-2 rounded-lg items-center justify-center shadow-md"
+          style={{ minWidth: 120, height: 40 }}
+        >
+          <Text className="text-white text-sm font-sans-semibold text-center">
+            Active
+          </Text>
+        </View>
+      );
+    }
+    if (student.registered) {
+      return (
+        <View
+          className="bg-blue-600 px-3 py-2 rounded-lg items-center justify-center shadow-md"
+          style={{ minWidth: 120, height: 40 }}
+        >
+          <Text className="text-white text-xs font-sans-semibold text-center">
+            Registered
+          </Text>
+        </View>
+      );
+    }
+    if (student.invitationSent) {
+      return (
+        <View
+          className="bg-gray-400 px-3 py-2 rounded-lg items-center justify-center shadow-md"
+          style={{ minWidth: 120, height: 40 }}
+        >
+          <Text className="text-white text-xs font-sans-semibold text-center">
+            Invitation Sent
+          </Text>
+        </View>
+      );
+    }
+    return (
+      <TouchableOpacity
+        onPress={() => handleSendInvitation(student.id)}
+        className="bg-secondary active:bg-secondary-700 px-3 py-2 rounded-lg items-center justify-center shadow-md"
+        style={{ minWidth: 120, height: 40 }}
+        activeOpacity={0.7}
+      >
+        <Text className="text-white text-xs font-sans-semibold text-center">
+          Send Invitation
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
   const renderStudent = ({ item }: { item: Student }): JSX.Element => (
-    <View className="bg-white border border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
+    <View className="bg-white border border-gray-200 rounded-xl p-4 mb-3 mx-4 shadow-sm">
       <View className="flex-row justify-between items-center">
         <View className="flex-1 mr-3">
           <View className="flex-row items-baseline mb-1 flex-wrap">
-            <Text className="text-lg font-semibold text-gray-800 mr-2 leading-tight">
+            <Text className="text-lg font-sans-semibold text-gray-800 mr-2 leading-tight">
               {item.studentName}
             </Text>
-            <Text className="text-sm text-blue-600 font-medium leading-tight">
-              {"("}
-              {item.id}
-              {")"}
+            <Text className="text-sm text-blue-600 font-sans-medium leading-tight">
+              ({item.id})
             </Text>
           </View>
-          <Text className="text-sm text-gray-600 mb-1">
-            {"Parent: "}
-            {item.parentName}
-          </Text>
+          <TouchableOpacity onPress={() => openMessageModal(item)}>
+            <Text className="text-sm text-secondary font-sans-semibold underline">
+              Parent: {item.parentName}
+            </Text>
+          </TouchableOpacity>
           <Text className="text-sm text-gray-600">
-            {"Contact: "}
-            {item.contactNumber}
+            Contact: {item.contactNumber}
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={() => handleSendInvitation(item.id)}
-          className={`
-            ${
-              item.invitationSent
-                ? "bg-gray-400" // Disabled color
-                : "bg-secondary active:bg-secondary-700" // Active color from your snippet
-            }
-            px-3 py-2 rounded-lg items-center justify-center shadow-md
-          `}
-          style={{ minWidth: 120, height: 40 }}
-          activeOpacity={item.invitationSent ? 1 : 0.7} // No opacity change if disabled
-          disabled={item.invitationSent}
-        >
-          <Text className="text-white text-xs font-semibold text-center">
-            {item.invitationSent ? "Invitation Sent" : "Send Invitation"}
-          </Text>
-        </TouchableOpacity>
+        {renderStatusButton(item)}
       </View>
     </View>
   );
 
   return (
     <ImageBackground
-      source={require("../../assets/images/bg.jpg")} // Ensure this path is correct
+      source={require("../../assets/images/bg.jpg")}
       style={{ width, height }}
       resizeMode="cover"
     >
@@ -162,28 +204,50 @@ export default function ClassScreen(): JSX.Element {
         style={{ flex: 1 }}
       >
         <SafeAreaView edges={["bottom", "left", "right"]} className="flex-1">
+          <View className="flex-row justify-end items-center px-4 pt-4">
+            <View className="mr-3 items-end">
+              <Text className="text-base font-sans-semibold text-secondary">
+                Ms. Carla
+              </Text>
+              <Text className="text-sm font-sans-regular text-gray-600">
+                Teacher
+              </Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary"
+            >
+              <Image
+                source={require("../../assets/images/teach_avatar2.png")}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View className="px-4 mt-6 mb-3">
+            <Text className="text-3xl font-sans-bold text-txt_blue text-center">
+              Class Management
+            </Text>
+          </View>
+
           <FlatList
             data={students}
             keyExtractor={(item) => item.id}
             renderItem={renderStudent}
             ListHeaderComponent={
-              <View className="px-5 pt-8 pb-4 md:pt-10">
-                <Text className="text-3xl font-sans-bold text-center mt-10 mb-6 text-txt_blue">
-                  {"Class Management"}
-                </Text>
-                <View className="bg-white/95 rounded-2xl p-5 mb-6 shadow-lg">
+              <>
+                <View className="bg-white/95 rounded-2xl p-4 mx-4 my-3 shadow-lg">
                   <Text className="text-base font-sans-regular text-gray-700 mb-1">
-                    {"Please provide student information in the format:"}
+                    Please provide student information in the format:
                   </Text>
                   <Text className="text-sm font-sans-regular text-gray-500 mb-3">
-                    {"Student Name,Parent Name,Contact Number"}
-                    {"\n"}
-                    {"(one student per line)"}
+                    Student Name,Parent Name,Contact Number{"\n"}(one student
+                    per line)
                   </Text>
                   <TextInput
                     className="border border-gray-300 rounded-xl px-4 py-3 font-sans-regular text-base text-gray-800 h-32"
                     placeholder={
-                      // Updated placeholder
                       "Alex Lee,Maria Lee,09123456789\nJohn Smith,Peter Smith,09876543210"
                     }
                     placeholderTextColor="#999"
@@ -200,65 +264,96 @@ export default function ClassScreen(): JSX.Element {
                     activeOpacity={0.8}
                   >
                     <Text className="text-white text-base font-sans-bold tracking-wide">
-                      {"Add Students"}
+                      Add Students
                     </Text>
                   </TouchableOpacity>
                 </View>
                 {students.length > 0 && (
-                  <Text className="text-xl font-sans-semibold text-gray-700 mb-3 px-1">
-                    {"Students"}
-                  </Text>
+                  <View className="px-4">
+                    <Text className="text-xl font-sans-semibold text-gray-700 mb-3">
+                      Students
+                    </Text>
+                  </View>
                 )}
-              </View>
+              </>
             }
             ListEmptyComponent={
-              <View className="items-center mt-10 px-5">
+              <View className="items-center mt-10 px-4">
                 <Text className="text-lg text-gray-600 text-center mb-2">
-                  {"No students added yet."}
+                  No students added yet.
                 </Text>
                 <Text className="text-sm text-gray-500 text-center">
-                  {"Use the form above to add students."} {/* Updated text */}
+                  Use the form above to add students.
                 </Text>
               </View>
             }
-            contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 20 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
           />
         </SafeAreaView>
       </KeyboardAvoidingView>
 
-      {/* Modal for Invalid Input - Updated Structure and Content */}
+      {/* Message Modal for Specific Parent */}
       <Modal
         transparent
         animationType="fade"
-        visible={showInvalidInputModal}
-        onRequestClose={() => setShowInvalidInputModal(false)}
+        visible={showMessageModal}
+        onRequestClose={() => setShowMessageModal(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50 px-5">
-          {/* Modal Content as per your provided structure */}
-          <View
-            className="bg-white p-6 rounded-2xl w-4/5 items-center shadow-lg"
-            style={{ maxWidth: width * 0.9 }} // Responsive modal width
-          >
-            <Text className="text-2xl sm:text-3xl lg:text-4xl font-sans-bold text-secondary mb-4">
-              {"Ooops!"}
-            </Text>
-            <Text className="text-center text-base sm:text-lg lg:text-xl font-sans-medium text-gray-700 mb-6">
-              {
-                "Please ensure each student entry includes a Student Name, Parent Name, and Contact Number, separated by commas. Input cannot be empty."
-              }
-              {"\n\n"}
-              {"Example: Alex Lee,Maria Lee,09123456789"}
-            </Text>
-            <TouchableOpacity
-              className="bg-primary px-6 py-2 rounded-full shadow-md active:opacity-80" // Updated button style
-              onPress={() => setShowInvalidInputModal(false)}
-              activeOpacity={0.8}
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="bg-white rounded-t-3xl pt-6 pb-8 h-3/4 max-h-[90vh]">
+            <View className="px-6 pb-4 border-b border-gray-200">
+              <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-2xl font-sans-bold text-primary">
+                  Message
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowMessageModal(false)}
+                  className="p-2"
+                >
+                  <Text className="text-gray-500 text-lg">✕</Text>
+                </TouchableOpacity>
+              </View>
+              {selectedStudent && (
+                <View className="flex-row items-center">
+                  <Image
+                    source={require("../../assets/images/teach_avatar2.png")}
+                    className="w-12 h-12 rounded-full mr-3"
+                  />
+                  <View>
+                    <Text className="text-lg font-sans-semibold text-gray-800">
+                      {selectedStudent.parentName}
+                    </Text>
+                    <Text className="text-sm font-sans-regular text-gray-500">
+                      Parent of {selectedStudent.studentName}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            <ScrollView
+              className="flex-1 px-6 pt-4"
+              contentContainerStyle={{ paddingBottom: 20 }}
             >
-              <Text className="text-white text-xl font-sans-semibold">
-                {"OKAY"}
+              <Text className="text-base text-gray-600">
+                Start a conversation with {selectedStudent?.parentName}.
               </Text>
-            </TouchableOpacity>
+              {/* You can map messages here */}
+            </ScrollView>
+
+            <View className="px-6 pt-3 border-t border-gray-200">
+              <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
+                <TextInput
+                  placeholder="Type a message..."
+                  placeholderTextColor="#9CA3AF"
+                  className="flex-1 font-sans-regular text-gray-800 text-base"
+                />
+                <TouchableOpacity className="ml-2 p-2">
+                  <Text className="text-primary text-lg">➤</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </View>
       </Modal>

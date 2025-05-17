@@ -7,13 +7,9 @@ import {
   ScrollView,
   useWindowDimensions,
   Modal,
-  Image,
 } from "react-native";
 import * as Speech from "expo-speech";
-import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-
-const router = useRouter();
 
 const storyPages: string[] = [
   'On a hot summer day, a thirsty crow looked for water to drink. "It\'s hot! I am thirsty!" said the crow. "I need to find water."',
@@ -33,12 +29,6 @@ const storyImages: any[] = [
   require("../../../../assets/images/story/p6.png"),
 ];
 
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correct: string;
-}
-
 export default function CrowStory() {
   const [page, setPage] = useState<number>(0);
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -46,11 +36,7 @@ export default function CrowStory() {
   const [accuracy, setAccuracy] = useState<number>(0);
   const [showPrompt, setShowPrompt] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [readingTime, setReadingTime] = useState(60);
-
-  const [isQuizVisible, setIsQuizVisible] = useState(false);
-  const [quizAnswers, setQuizAnswers] = useState<{ [key: number]: string }>({});
-  const [quizFinished, setQuizFinished] = useState(false);
+  const [readingTime, setReadingTime] = useState(60); // Placeholder value
 
   const { width } = useWindowDimensions();
   const isSmallDevice = width < 375;
@@ -88,15 +74,15 @@ export default function CrowStory() {
         duration: 300,
         useNativeDriver: true,
       }).start(() => {
-        handleSpeak(nextPage);
+        handleSpeak();
       });
     });
   };
 
-  const handleSpeak = (pageIndex: number = page) => {
+  const handleSpeak = () => {
     setShowPrompt(false);
     setIsReading(true);
-    Speech.speak(storyPages[pageIndex], {
+    Speech.speak(storyPages[page], {
       rate: 0.6,
       pitch: 1.0,
       language: "en-US",
@@ -115,7 +101,7 @@ export default function CrowStory() {
 
   const handleStartListening = () => {
     setIsListening(true);
-    // Placeholder: integrate speech-to-text later
+    // Placeholder for speech recognition
   };
 
   const handleStopListening = () => {
@@ -156,34 +142,8 @@ export default function CrowStory() {
 
   useEffect(() => {
     updateProgress(page);
-    handleSpeak(page);
+    handleSpeak(); // Speak first page on load
   }, []);
-
-  const quizQuestions: QuizQuestion[] = [
-    {
-      question: "What is the title of the story you read?",
-      options: ["The Crow and The Pitcher", "The Clever Fox", "The Lazy Dog"],
-      correct: "The Crow and The Pitcher",
-    },
-  ];
-
-  const handleQuizAnswer = (qIndex: number, option: string) => {
-    setQuizAnswers((prev) => ({ ...prev, [qIndex]: option }));
-  };
-
-  const quizScore = () => {
-    let score = 0;
-    quizQuestions.forEach((q, i) => {
-      if (quizAnswers[i] === q.correct) score++;
-    });
-    return score;
-  };
-
-  const finishQuiz = () => {
-    setQuizFinished(true);
-    setIsQuizVisible(false);
-    setIsModalVisible(true);
-  };
 
   return (
     <ScrollView
@@ -250,7 +210,7 @@ export default function CrowStory() {
 
         <View className="flex-row justify-center space-x-4 mb-4 gap-4">
           <Pressable
-            onPress={() => handleSpeak(page)}
+            onPress={handleSpeak}
             className="bg-purple-500 p-3 rounded-full items-center justify-center"
           >
             <MaterialIcons name="volume-up" size={24} color="white" />
@@ -315,7 +275,7 @@ export default function CrowStory() {
           )}
           {page === storyPages.length - 1 && (
             <Pressable
-              onPress={() => setIsQuizVisible(true)}
+              onPress={() => setIsModalVisible(true)}
               className="bg-green-500 px-4 py-2 rounded-xl ml-auto"
             >
               <Text className="text-white font-semibold">Finish</Text>
@@ -324,83 +284,27 @@ export default function CrowStory() {
         </View>
       </View>
 
-      {/* Quiz Modal */}
-      <Modal transparent visible={isQuizVisible} animationType="fade">
-        <View className="flex-1 justify-center items-center px-6 absolute inset-0 bg-[#FEF0F2] bg-opacity-50">
-          <View className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[80%]">
-            <Text className="text-2xl font-sans-bold mb-4 text-center">
-              Quiz Time! 🎓
-            </Text>
-            <ScrollView>
-              {quizQuestions.map((q, i) => (
-                <View key={i} className="mb-6">
-                  <Text className="font-semibold mb-2">{q.question}</Text>
-                  {q.options.map((option) => (
-                    <Pressable
-                      key={option}
-                      onPress={() => handleQuizAnswer(i, option)}
-                      className={`py-2 px-4 rounded-md mb-1 border ${
-                        quizAnswers[i] === option
-                          ? "border-blue-500 bg-blue-100"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      <Text>{option}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              ))}
-            </ScrollView>
-
-            <Pressable
-              onPress={finishQuiz}
-              disabled={
-                Object.keys(quizAnswers).length !== quizQuestions.length
-              }
-              className={`${
-                Object.keys(quizAnswers).length === quizQuestions.length
-                  ? "bg-purple-600"
-                  : "bg-gray-400"
-              } mt-4 py-2 rounded-xl`}
-            >
-              <Text className="text-white text-center font-semibold">
-                Submit Quiz
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Congratulations Modal */}
+      {/* 🎉 Modal */}
       <Modal transparent visible={isModalVisible} animationType="fade">
-        <View className="flex-1 justify-center items-center px-6 absolute inset-0 bg-[#FEF0F2] bg-opacity-50">
+        <View className="flex-1 justify-center items-center px-6 absolute inset-0">
           <View className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <Text className="text-3xl font-sans-bold text-center text-green-700 mb-2">
-              Congratulations!
+            <Text className="text-2xl font-sans-bold mb-2 text-secondary text-center">
+              🎉 Congratulations!
+            </Text>
+            <Text className="text-lg font-sans-regular text-center mb-1">
+              You finished the story!
             </Text>
             <Text className="text-md mt-4">
-              <Text className="font-sans-semibold">Reading Time: </Text>
+              <Text className="font-sans-semibold">Reading Time:</Text>{" "}
               {readingTime} seconds
             </Text>
             <Text className="text-md">
-              <Text className="font-sans-semibold">Accuracy: </Text>
-              {accuracy}%
+              <Text className="font-sans-semibold">Accuracy:</Text> {accuracy}%
             </Text>
-            {quizFinished && (
-              <Text className="text-md mt-2">
-                <Text className="font-sans-semibold">Quiz Score: </Text>
-                {quizScore()} / {quizQuestions.length}
-              </Text>
-            )}
 
             <Pressable
-              onPress={() => {
-                setIsModalVisible(false);
-                setQuizAnswers({});
-                setQuizFinished(false);
-                router.push("/parent/kid/(tabs)/kid_homepage");
-              }}
-              className="mt-6 bg-green-500 py-3 rounded-xl"
+              onPress={() => setIsModalVisible(false)}
+              className="bg-primary mt-6 py-2 rounded-xl"
             >
               <Text className="text-white text-center font-semibold">
                 Close
