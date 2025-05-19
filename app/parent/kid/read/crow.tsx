@@ -165,6 +165,43 @@ export default function CrowStory() {
       options: ["The Crow and The Pitcher", "The Clever Fox", "The Lazy Dog"],
       correct: "The Crow and The Pitcher",
     },
+    {
+      question: "Why was the crow looking for water?",
+      options: [
+        "He wanted to take a bath",
+        "He was thirsty",
+        "He wanted to water the plants",
+      ],
+      correct: "He was thirsty",
+    },
+    {
+      question: "What did the crow find near the well?",
+      options: ["A bottle", "A bucket", "A pitcher"],
+      correct: "A pitcher",
+    },
+    {
+      question: "Why couldn't the crow drink the water at first?",
+      options: [
+        "The water was dirty",
+        "The pitcher was too heavy",
+        "The pitcher’s neck was narrow",
+      ],
+      correct: "The pitcher’s neck was narrow",
+    },
+    {
+      question: "What did the crow use to raise the water level?",
+      options: ["Leaves", "Sand", "Small stones"],
+      correct: "Small stones",
+    },
+    {
+      question: "What happened after the crow added the stones?",
+      options: [
+        "The pitcher broke",
+        "The water level rose",
+        "The crow flew away",
+      ],
+      correct: "The water level rose",
+    },
   ];
 
   const handleQuizAnswer = (qIndex: number, option: string) => {

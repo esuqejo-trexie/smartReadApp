@@ -35,6 +35,7 @@ export default function SignUp() {
       <Image
         source={require("../assets/images/SmartReadLogo.png")}
         style={{ width: width * 0.6, height: width * 0.6 }}
+        resizeMode="contain"
       />
 
       {/* Responsive text */}
@@ -77,18 +78,18 @@ export default function SignUp() {
         onPress={handleSignUp}
       >
         <Text className="text-white text-3xl sm:text-4xl lg:text-5xl font-sans-medium">
-          SIGN UP
+          LOG IN
         </Text>
       </TouchableOpacity>
 
       {/* Login Link */}
       <TouchableOpacity
         onPress={() => {
-          router.push("/login");
+          /* Handle login navigation here */
         }}
       >
         <Text className="text-xs sm:text-sm lg:text-base text-pink-600 underline">
-          HAVE AN ACCOUNT? LOG IN
+          DON'T HAVE AN ACCOUNT? SIGN UP
         </Text>
       </TouchableOpacity>
 
